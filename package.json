@@ -1,0 +1,25 @@
+{
+  "name": "vectorstore",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "ts-patch install && typia patch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "ts-patch": "^3.3.0",
+    "typescript": "~5.7.3"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.744.0",
+    "@prisma/client": "^6.3.1",
+    "dotenv": "^16.4.7",
+    "openai": "^4.83.0",
+    "prisma": "^6.3.1",
+    "typia": "^7.6.3"
+  }
+}

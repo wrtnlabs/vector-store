@@ -1,0 +1,45 @@
+datasource db {
+    provider   = "postgresql"
+    url        = env("POSTGRES_URL")
+    extensions = [pg_trgm]
+}
+
+generator client {
+    provider        = "prisma-client-js"
+    previewFeatures = ["postgresqlExtensions"]
+}
+
+model File {
+    id              String            @id
+    hash            String
+    name            String
+    size            Int /// byte
+    url             String /// s3 URI
+    created_at      DateTime          @db.Timestamptz()
+    VectorStoreFile VectorStoreFile[]
+}
+
+model VectorStore {
+    id         String    @id
+    type       String?
+    name       String
+    created_at DateTime  @db.Timestamptz()
+    expires_at DateTime?
+
+    VectorStoreFile VectorStoreFile[]
+}
+
+model VectorStoreFile {
+    id              String   @id
+    name            String
+    hash            String?
+    vector_store_id String
+    file_id         String?
+    extension       String?
+    url             String /// s3 URI
+    size            Int /// byte
+    created_at      DateTime @db.Timestamptz()
+
+    vectorStore VectorStore @relation(fields: [vector_store_id], references: [id])
+    file        File?       @relation(fields: [file_id], references: [id])
+}
