@@ -1,4 +1,5 @@
 import { IFile } from "./IFile";
+import { IPagination } from "./IPagination";
 
 /**
  * A generic storage interface that abstracts the underlying storage mechanism.
@@ -15,7 +16,7 @@ export interface IStore {
    *
    * @returns A promise resolving to an array of stored files.
    */
-  getFiles: () => Promise<IFile[]>;
+  getFiles: (paginationInfo?: IPagination) => Promise<IFile[]>;
 
   /**
    * Inserts files into the store.
