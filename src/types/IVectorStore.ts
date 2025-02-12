@@ -2,6 +2,56 @@ import { tags } from "typia";
 import { IStore } from "./IStore";
 import { IVectorStoreFile } from "./IVectorStoreFile";
 
+export interface IFileFunction {
+  /**
+   * Adds a file reference to the vector store's analysis list.
+   * This operation only registers the file for analysis and does not remove or alter the actual file in the IStore.
+   *
+   * @returns A promise resolving to a number (formatted as a uint32) representing the result,
+   *          which might indicate a success status or the count of added file references.
+   */
+  create: () => Promise<number & tags.Type<"uint32">>;
+
+  /**
+   * Removes a file reference from the vector store's analysis list.
+   * This operation only unregisters the file from analysis and does not delete the actual file from the IStore.
+   *
+   * @returns A promise resolving to a number (formatted as a uint32) indicating the outcome,
+   *          such as a success status or the count of removed file references.
+   */
+  remove: () => Promise<number & tags.Type<"uint32">>;
+
+  /**
+   * Retrieves the list of files currently registered in the vector store.
+   *
+   * @returns A promise resolving to an array of VectorStoreFile objects.
+   */
+  list: () => Promise<IVectorStoreFile[]>;
+}
+
+/**
+ * Represents a vector store instance.
+ * A vector store manages vector representations (embeddings) of files,
+ * and can be integrated with various storage backends.
+ */
+export interface IVectorStore {
+  /**
+   * Unique identifier for the vector store.
+   */
+  id: string;
+
+  /**
+   * Human-readable name of the vector store.
+   */
+  name: string;
+
+  /**
+   * The type of the vector store (e.g., "openai", "pgvector").
+   * This field can be null if no specific type is assigned.
+   */
+  type: string | null;
+}
+
 /**
  * An abstract vector store interface that represents a vector database,
  * such as OpenAI's vectorStore or even Postgres's pgvector.
@@ -29,36 +79,11 @@ export abstract class IVectorStore {
    *
    * @returns A promise that resolves to an object containing the vector store's id, name, and type.
    */
-  abstract create(): Promise<{ id: string; name: string; type: string | null }>;
+  abstract create(): Promise<IVectorStore>;
 
   /**
    * A getter that returns an object with methods for managing the list of files
    * to be analyzed by the vector store.
    */
-  abstract get file(): {
-    /**
-     * Adds a file reference to the vector store's analysis list.
-     * This operation only registers the file for analysis and does not remove or alter the actual file in the IStore.
-     *
-     * @returns A promise resolving to a number (formatted as a uint32) representing the result,
-     *          which might indicate a success status or the count of added file references.
-     */
-    create: () => Promise<number & tags.Type<"uint32">>;
-
-    /**
-     * Removes a file reference from the vector store's analysis list.
-     * This operation only unregisters the file from analysis and does not delete the actual file from the IStore.
-     *
-     * @returns A promise resolving to a number (formatted as a uint32) indicating the outcome,
-     *          such as a success status or the count of removed file references.
-     */
-    remove: () => Promise<number & tags.Type<"uint32">>;
-
-    /**
-     * Retrieves the list of files currently registered in the vector store.
-     *
-     * @returns A promise resolving to an array of VectorStoreFile objects.
-     */
-    list: () => Promise<IVectorStoreFile[]>;
-  };
+  abstract get file(): IFileFunction;
 }
