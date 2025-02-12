@@ -3,6 +3,59 @@ import { tags } from "typia";
 export type File = (string & tags.Format<"iri">) | ArrayBuffer;
 
 /**
+ * Represents a file record in the vector store.
+ */
+export interface VectorStoreFile {
+  /**
+   * Unique identifier for the vector store file.
+   */
+  id: string;
+
+  /**
+   * Saved name of the file.
+   */
+  name: string;
+
+  /**
+   * SHA-256 hash of the file content.
+   * This hash is generated using a function like `getFileHash` (see below) to compute a hash from a file buffer,
+   * and is used to detect duplicate files.
+   */
+  hash?: string;
+
+  /**
+   * Identifier of the associated vector store.
+   */
+  vector_store_id: string;
+
+  /**
+   * Optional identifier of the file.
+   */
+  file_id?: string;
+
+  /**
+   * Optional file extension.
+   */
+  extension?: string;
+
+  /**
+   * Publicly accessible address of the file.
+   */
+  url: string;
+
+  /**
+   * Size of the file in bytes.
+   */
+  size: number;
+
+  /**
+   * Timestamp when the file record was created.
+   * Represented as an ISO 8601 formatted string.
+   */
+  created_at: string & tags.Format<"date-time">;
+}
+
+/**
  * A generic storage interface that abstracts the underlying storage mechanism.
  * The storage could be a database (e.g., Redis, Postgres) or a temporary in-memory store.
  * It provides methods to retrieve, insert, and remove files.
@@ -93,5 +146,12 @@ export abstract class IVectorStore {
      *          such as a success status or the count of removed file references.
      */
     remove: () => Promise<number & tags.Type<"uint32">>;
+
+    /**
+     * Retrieves the list of files currently registered in the vector store.
+     *
+     * @returns A promise resolving to an array of VectorStoreFile objects.
+     */
+    list: () => Promise<VectorStoreFile[]>;
   };
 }
