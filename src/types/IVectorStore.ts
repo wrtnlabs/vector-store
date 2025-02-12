@@ -1,25 +1,52 @@
-import { tags } from "typia";
 import { IStore } from "./IStore";
 import { IVectorStoreFile } from "./IVectorStoreFile";
+
+/**
+ * Number of files covered by Vector DB
+ */
+export interface FileCounts {
+  /**
+   * The number of files that were cancelled.
+   */
+  cancelled: number;
+
+  /**
+   * The number of files that have been successfully processed.
+   */
+  completed: number;
+
+  /**
+   * The number of files that have failed to process.
+   */
+  failed: number;
+
+  /**
+   * The number of files that are currently being processed.
+   */
+  in_progress: number;
+
+  /**
+   * The total number of files.
+   */
+  total: number;
+}
 
 export interface IFileFunction {
   /**
    * Adds a file reference to the vector store's analysis list.
    * This operation only registers the file for analysis and does not remove or alter the actual file in the IStore.
    *
-   * @returns A promise resolving to a number (formatted as a uint32) representing the result,
-   *          which might indicate a success status or the count of added file references.
+   * @returns Number of files covered by Vector DB
    */
-  create: () => Promise<number & tags.Type<"uint32">>;
+  attach: () => Promise<FileCounts>;
 
   /**
    * Removes a file reference from the vector store's analysis list.
    * This operation only unregisters the file from analysis and does not delete the actual file from the IStore.
    *
-   * @returns A promise resolving to a number (formatted as a uint32) indicating the outcome,
-   *          such as a success status or the count of removed file references.
+   * @returns Number of files covered by Vector DB
    */
-  remove: () => Promise<number & tags.Type<"uint32">>;
+  detach?: () => Promise<FileCounts>;
 
   /**
    * Retrieves the list of files currently registered in the vector store.
@@ -64,9 +91,24 @@ export interface IVectorStore {
  * the actual files in the IStore. Instead, they only manage which files are included in the analysis
  * list of the vector store.
  */
-export abstract class IVectorStore {
+export abstract class IVectorStore implements IFileFunction {
   // The underlying file storage mechanism (could be Redis, Postgres, in-memory, etc.)
   constructor(private readonly store: IStore) {}
+
+  /**
+   * @inheritdoc
+   */
+  abstract attach(): Promise<FileCounts>;
+
+  /**
+   * @inheritdoc
+   */
+  abstract detach(): Promise<FileCounts>;
+
+  /**
+   * @inheritdoc
+   */
+  abstract list(): Promise<IVectorStoreFile[]>;
 
   /**
    * Creates a new vector store instance.
