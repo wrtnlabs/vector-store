@@ -31,7 +31,8 @@ model VectorStore {
 
 model VectorStoreFile {
     id              String   @id
-    hash            String
+    name            String
+    hash            String?
     vector_store_id String
     file_id         String?
     extension       String?
