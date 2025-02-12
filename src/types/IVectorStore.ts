@@ -122,10 +122,4 @@ export abstract class IVectorStore implements IFileFunction {
    * @returns A promise that resolves to an object containing the vector store's id, name, and type.
    */
   abstract create(): Promise<IVectorStore>;
-
-  /**
-   * A getter that returns an object with methods for managing the list of files
-   * to be analyzed by the vector store.
-   */
-  abstract get file(): IFileFunction;
 }
