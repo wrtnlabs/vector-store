@@ -1,4 +1,5 @@
 import { IFile } from "./IFile";
+import { IProvider } from "./IProvider";
 import { IStore } from "./IStore";
 import { IVectorStoreFile } from "./IVectorStoreFile";
 
@@ -57,27 +58,34 @@ export interface IFileFunction {
   list: () => Promise<IVectorStoreFile[]>;
 }
 
-/**
- * Represents a vector store instance.
- * A vector store manages vector representations (embeddings) of files,
- * and can be integrated with various storage backends.
- */
-export interface IVectorStore {
-  /**
-   * Unique identifier for the vector store.
-   */
-  id: string;
+export namespace IVectorStore {
+  export interface ICreate {
+    type: "openai";
+    provider: IProvider;
+  }
 
   /**
-   * Human-readable name of the vector store.
+   * Represents a vector store instance.
+   * A vector store manages vector representations (embeddings) of files,
+   * and can be integrated with various storage backends.
    */
-  name: string;
+  export interface IAt {
+    /**
+     * Unique identifier for the vector store.
+     */
+    id: string;
 
-  /**
-   * The type of the vector store (e.g., "openai", "pgvector").
-   * This field can be null if no specific type is assigned.
-   */
-  type: string | null;
+    /**
+     * Human-readable name of the vector store.
+     */
+    name: string;
+
+    /**
+     * The type of the vector store (e.g., "openai", "pgvector").
+     * This field can be null if no specific type is assigned.
+     */
+    type: string | null;
+  }
 }
 
 /**
@@ -122,5 +130,5 @@ export abstract class IVectorStore implements IFileFunction {
    *
    * @returns A promise that resolves to an object containing the vector store's id, name, and type.
    */
-  abstract create(): Promise<IVectorStore>;
+  abstract create(props: IVectorStore.ICreate): Promise<IVectorStore.IAt>;
 }
