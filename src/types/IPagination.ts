@@ -1,14 +1,68 @@
 import { tags } from "typia";
 
-export interface IPagination {
+/**
+ *  A page.
+ *
+ *  Collection of records with pagination indformation.
+ *
+ *  @template T Record type
+ *  @author Samchon
+ */
+export interface IPage<T extends object> {
   /**
-   * This refers to the number of elements per page.
+   *  Page information.
    */
-  count: number & tags.Type<"int64">;
+  pagination: IPage.IPagination;
 
   /**
-   * It refers to the page on which data is to be searched.
-   * The method of calculation is bound to be affected by the count.
+   *  List of records.
    */
-  page: number & tags.Type<"int64">;
+  data: T[];
+}
+export namespace IPage {
+  /**
+   *  Page information.
+   */
+  export interface IPagination {
+    /**
+     *  Current page number.
+     */
+    current: number & tags.Type<"uint32">;
+
+    /**
+     *  Limitation of records per a page.
+     *
+     *  @default 100
+     */
+    limit: number & tags.Type<"uint32">;
+
+    /**
+     *  Total records in the database.
+     */
+    records: number & tags.Type<"uint32">;
+
+    /**
+     *  Total pages.
+     *
+     *  Equal to {@link records} / {@link limit} with ceiling.
+     */
+    pages: number & tags.Type<"uint32">;
+  }
+
+  /**
+   *  Page request data
+   */
+  export interface IRequest {
+    /**
+     *  Page number.
+     */
+    page?: number & tags.Type<"uint32">;
+
+    /**
+     *  Limitation of records per a page.
+     *
+     *  @default 100
+     */
+    limit?: number & tags.Type<"uint32">;
+  }
 }
