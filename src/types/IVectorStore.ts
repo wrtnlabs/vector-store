@@ -1,3 +1,4 @@
+import { IFile } from "./IFile";
 import { IStore } from "./IStore";
 import { IVectorStoreFile } from "./IVectorStoreFile";
 
@@ -38,7 +39,7 @@ export interface IFileFunction {
    *
    * @returns Number of files covered by Vector DB
    */
-  attach: () => Promise<FileCounts>;
+  attach: (file: IFile) => Promise<FileCounts>;
 
   /**
    * Removes a file reference from the vector store's analysis list.
@@ -93,12 +94,12 @@ export interface IVectorStore {
  */
 export abstract class IVectorStore implements IFileFunction {
   // The underlying file storage mechanism (could be Redis, Postgres, in-memory, etc.)
-  constructor(private readonly store: IStore) {}
+  constructor(protected readonly store: IStore) {}
 
   /**
    * @inheritdoc
    */
-  abstract attach(): Promise<FileCounts>;
+  abstract attach(file: IFile): Promise<FileCounts>;
 
   /**
    * @inheritdoc
