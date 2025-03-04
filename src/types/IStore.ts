@@ -16,7 +16,15 @@ export interface IStore {
    *
    * @returns A promise resolving to an array of stored files.
    */
-  getFiles: (paginationInfo?: IPage.IRequest) => Promise<IPage<IFile>>;
+  index: (paginationInfo?: IPage.IRequest) => Promise<IPage<IFile>>;
+
+  /**
+   * Get File by ID
+   *
+   * @param id Unique ID of File
+   * @returns File as ArrayBuffer or iri
+   */
+  at: (id: string) => Promise<IFile>;
 
   /**
    * Inserts files into the store.
