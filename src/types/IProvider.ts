@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { AssistantCreateParams } from "openai/resources/beta/assistants";
 import { FileChunkingStrategyParam } from "openai/resources/beta/vector-stores/vector-stores";
 
 export interface IProvider {
@@ -25,6 +26,18 @@ export interface IProvider {
     | {
         /**
          * If you have already created it, please inject the ID of the Vector Store.
+         */
+        id: string;
+      };
+
+  /**
+   * Assistant
+   */
+  assistant:
+    | AssistantCreateParams
+    | {
+        /**
+         * if you have already created it, please inject the ID of the Assistant.
          */
         id: string;
       };

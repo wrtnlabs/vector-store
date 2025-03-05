@@ -88,6 +88,16 @@ export namespace IVectorStore {
   }
 }
 
+export namespace IAssistant {
+  export interface IAt {
+    id: string;
+
+    name: string | null;
+
+    type: string | null;
+  }
+}
+
 /**
  * An abstract vector store interface that represents a vector database,
  * such as OpenAI's vectorStore or even Postgres's pgvector.
@@ -130,5 +140,5 @@ export abstract class IVectorStore implements IFileFunction {
    *
    * @returns A promise that resolves to an object containing the vector store's id, name, and type.
    */
-  abstract create(props: IVectorStore.ICreate): Promise<IVectorStore.IAt>;
+  abstract create(props: IVectorStore.ICreate): Promise<{ vectorStore: IVectorStore.IAt; assistant: IAssistant.IAt }>;
 }
