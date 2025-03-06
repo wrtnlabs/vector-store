@@ -145,12 +145,8 @@ export abstract class IVectorStore implements IFileFunction {
    * Creates a new vector store instance.
    *
    * This method should be implemented to initialize the vector store and return metadata
-   * about the store, such as:
-   * - id: A unique identifier for the vector store.
-   * - name: A human-readable name for the vector store.
-   * - type: An optional type indicator (e.g., "openai", "pgvector") or null.
    *
    * @returns A promise that resolves to an object containing the vector store's id, name, and type.
    */
-  abstract create(props: IVectorStore.ICreate): Promise<{ vectorStore: IVectorStore.IAt; assistant: IAssistant.IAt }>;
+  abstract create(): Promise<{ vectorStore: IVectorStore.IAt; assistant: IAssistant.IAt }>;
 }

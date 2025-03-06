@@ -13,6 +13,13 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
     super(props.store);
   }
 
+  status() {
+    return {
+      vectorStore: this.vectorStore,
+      assistant: this.assistant,
+    };
+  }
+
   async query(props: IVectorStore.IQuery): Promise<{ response: string | null }> {
     if (this.assistant === null) {
       throw new Error("call `create` function before calling this function.");
@@ -78,13 +85,12 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
   /**
    * Create or find vector store and Assistant in OpenAI, by using SDK internally.
    *
+   * @inheritdoc
    * @param props Openai SDK configuration and create DTO
    * @returns vectorStore and Assistant
    */
-  async create(props: IVectorStore.ICreate): Promise<{ vectorStore: IVectorStore.IAt; assistant: IAssistant.IAt }> {
-    if (props.type === "openai") {
-      await this.init();
-    }
+  async create(): Promise<{ vectorStore: IVectorStore.IAt; assistant: IAssistant.IAt }> {
+    await this.init();
 
     if (this.vectorStore && this.assistant) {
       return {
@@ -127,7 +133,7 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
     return { vectorStore: this.vectorStore, assistant: this.assistant };
   }
 
-  async emplaceVectorStore(): Promise<OpenAI.Beta.VectorStores.VectorStore> {
+  private async emplaceVectorStore(): Promise<OpenAI.Beta.VectorStores.VectorStore> {
     const openai = this.props.provider.api;
     const vectorStore = this.props.provider.vectorStore;
 
@@ -140,24 +146,11 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
         },
       });
     } else {
-      let after: string | null = null;
-      do {
-        const fetched: Awaited<ReturnType<typeof openai.beta.vectorStores.list>> = await openai.beta.vectorStores.list({
-          ...(typeof after === "string" && { after }),
-        });
-
-        after = fetched.nextPageParams()?.after ?? null;
-        const created = fetched.data.find((item) => item.id === vectorStore.id);
-        if (created) {
-          return created;
-        }
-      } while (after);
+      return await openai.beta.vectorStores.retrieve(vectorStore.id);
     }
-
-    throw new Error("Failed to init vectorStore with openai.");
   }
 
-  async emplaceAssistant(): Promise<OpenAI.Beta.Assistants.Assistant> {
+  private async emplaceAssistant(): Promise<OpenAI.Beta.Assistants.Assistant> {
     const openai = this.props.provider.api;
     const assistant = this.props.provider.assistant;
 
