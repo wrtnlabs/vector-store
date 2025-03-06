@@ -1,3 +1,13 @@
 import { tags } from "typia";
 
-export type IFile = (string & tags.Format<"iri">) | ArrayBuffer;
+export type IFile = {
+  /**
+   * filename
+   */
+  name: string;
+
+  /**
+   * file data or url
+   */
+  data: (string & tags.Format<"iri">) | ArrayBuffer;
+};

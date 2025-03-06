@@ -1,3 +1,4 @@
+import { FileChunkingStrategyParam } from "openai/resources/beta/vector-stores/vector-stores";
 import { IFile } from "./IFile";
 import { IProvider } from "./IProvider";
 import { IStore } from "./IStore";
@@ -40,7 +41,7 @@ export interface IFileFunction {
    *
    * @returns Number of files covered by Vector DB
    */
-  attach: (file: IFile) => Promise<FileCounts>;
+  attach: (file: IVectorStore.IAttach) => Promise<FileCounts>;
 
   /**
    * Removes a file reference from the vector store's analysis list.
@@ -59,6 +60,11 @@ export interface IFileFunction {
 }
 
 export namespace IVectorStore {
+  export interface IAttach {
+    files: IFile[];
+    chunking_strategy?: FileChunkingStrategyParam;
+  }
+
   export interface ICreate {
     type: "openai";
     provider: IProvider;
@@ -117,7 +123,7 @@ export abstract class IVectorStore implements IFileFunction {
   /**
    * @inheritdoc
    */
-  abstract attach(file: IFile): Promise<FileCounts>;
+  abstract attach(file: IVectorStore.IAttach): Promise<FileCounts>;
 
   /**
    * @inheritdoc

@@ -1,6 +1,5 @@
 import OpenAI from "openai";
 import { tags } from "typia";
-import { IFile } from "./types/IFile";
 import { IProvider } from "./types/IProvider";
 import { IStore } from "./types/IStore";
 import { FileCounts, IAssistant, IVectorStore } from "./types/IVectorStore";
@@ -14,14 +13,23 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
     super(props.store);
   }
 
-  async attach(file: IFile): Promise<FileCounts> {
+  async attach(props: IVectorStore.IAttach): Promise<FileCounts> {
     if (this.vectorStore === null) {
       throw new Error("call `create` function before calling this function.");
     }
 
-    const buffer = typeof file === "string" ? await this.getFile(file) : file;
+    const vectorStoreId = this.vectorStore.id;
+    const files = await Promise.all(
+      props.files.map(async (el) => {
+        const buffer = typeof el.data === "string" ? await this.getFile(el.data) : el.data;
+        return new File([buffer], el.name, {});
+      })
+    );
 
-    throw new Error("Method not implemented.");
+    const openai = this.props.provider.api;
+    const response = await openai.beta.vectorStores.fileBatches.uploadAndPoll(vectorStoreId, { files: files });
+
+    return response.file_counts;
   }
 
   async detach(): Promise<FileCounts> {
@@ -48,7 +56,7 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
    */
   async create(props: IVectorStore.ICreate): Promise<{ vectorStore: IVectorStore.IAt; assistant: IAssistant.IAt }> {
     if (props.type === "openai") {
-      await this.init(props.provider);
+      await this.init();
     }
 
     if (this.vectorStore && this.assistant) {
@@ -77,20 +85,24 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
    * @param provider Openai Provider configuration
    * @returns vectorStore and Assistant
    */
-  private async init(
-    provider: IProvider
-  ): Promise<{ vectorStore: OpenAI.Beta.VectorStores.VectorStore; assistant: OpenAI.Beta.Assistants.Assistant }> {
-    this.vectorStore = await this.emplaceVectorStore(provider);
-    this.assistant = await this.emplaceAssistant(provider);
+  private async init(): Promise<{
+    vectorStore: OpenAI.Beta.VectorStores.VectorStore;
+    assistant: OpenAI.Beta.Assistants.Assistant;
+  }> {
+    this.vectorStore = await this.emplaceVectorStore();
+    this.assistant = await this.emplaceAssistant();
+
+    const openai = this.props.provider.api;
+    await openai.beta.assistants.update(this.assistant.id, {
+      tool_resources: { file_search: { vector_store_ids: [this.vectorStore.id] } },
+    });
 
     return { vectorStore: this.vectorStore, assistant: this.assistant };
   }
 
-  async emplaceVectorStore(
-    provider: Pick<IProvider, "api" | "vectorStore">
-  ): Promise<OpenAI.Beta.VectorStores.VectorStore> {
-    const openai = provider.api;
-    const vectorStore = provider.vectorStore;
+  async emplaceVectorStore(): Promise<OpenAI.Beta.VectorStores.VectorStore> {
+    const openai = this.props.provider.api;
+    const vectorStore = this.props.provider.vectorStore;
 
     if ("name" in vectorStore) {
       return await openai.beta.vectorStores.create({
@@ -118,9 +130,9 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
     throw new Error("Failed to init vectorStore with openai.");
   }
 
-  async emplaceAssistant(provider: Pick<IProvider, "api" | "assistant">): Promise<OpenAI.Beta.Assistants.Assistant> {
-    const openai = provider.api;
-    const assistant = provider.assistant;
+  async emplaceAssistant(): Promise<OpenAI.Beta.Assistants.Assistant> {
+    const openai = this.props.provider.api;
+    const assistant = this.props.provider.assistant;
 
     if ("id" in assistant) {
       return openai.beta.assistants.retrieve(assistant.id);
