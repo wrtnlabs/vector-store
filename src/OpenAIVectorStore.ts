@@ -9,7 +9,7 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
   private vectorStore: OpenAI.Beta.VectorStores.VectorStore | null = null;
   private assistant: OpenAI.Beta.Assistants.Assistant | null = null;
 
-  constructor(private readonly props: { provider: IProvider; store: IStore }) {
+  constructor(private readonly props: { provider: IProvider; store?: IStore }) {
     super(props.store);
   }
 

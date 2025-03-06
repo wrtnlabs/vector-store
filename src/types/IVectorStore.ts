@@ -118,7 +118,7 @@ export namespace IAssistant {
  */
 export abstract class IVectorStore implements IFileFunction {
   // The underlying file storage mechanism (could be Redis, Postgres, in-memory, etc.)
-  constructor(protected readonly store: IStore) {}
+  constructor(protected readonly store?: IStore) {}
 
   /**
    * @inheritdoc
