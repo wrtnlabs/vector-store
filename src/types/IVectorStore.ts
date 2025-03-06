@@ -60,6 +60,10 @@ export interface IFileFunction {
 }
 
 export namespace IVectorStore {
+  export interface IQuery {
+    query: string;
+  }
+
   export interface IAttach {
     files: IFile[];
     chunking_strategy?: FileChunkingStrategyParam;
@@ -120,10 +124,12 @@ export abstract class IVectorStore implements IFileFunction {
   // The underlying file storage mechanism (could be Redis, Postgres, in-memory, etc.)
   constructor(protected readonly store?: IStore) {}
 
+  abstract query(props: IVectorStore.IQuery): Promise<{ response: string | null }>;
+
   /**
    * @inheritdoc
    */
-  abstract attach(file: IVectorStore.IAttach): Promise<FileCounts>;
+  abstract attach(props: IVectorStore.IAttach): Promise<FileCounts>;
 
   /**
    * @inheritdoc

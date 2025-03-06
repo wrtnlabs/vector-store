@@ -13,6 +13,33 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
     super(props.store);
   }
 
+  async query(props: IVectorStore.IQuery): Promise<{ response: string | null }> {
+    if (this.assistant === null) {
+      throw new Error("call `create` function before calling this function.");
+    }
+
+    const openai = this.props.provider.api;
+    const thread = await openai.beta.threads.create({
+      messages: [
+        {
+          role: "user",
+          content: props.query,
+        },
+      ],
+    });
+
+    const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
+      assistant_id: this.assistant.id,
+    });
+
+    const messages = await openai.beta.threads.messages.list(thread.id, {
+      run_id: run.id,
+    });
+
+    const response = messages.data[0].content[0].type === "text" ? messages.data[0].content[0].text.value : null;
+    return { response };
+  }
+
   async attach(props: IVectorStore.IAttach): Promise<FileCounts> {
     if (this.vectorStore === null) {
       throw new Error("call `create` function before calling this function.");
