@@ -1,6 +1,6 @@
 {
   "name": "@agentica/openai-vector-store",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
   "publishConfig": {
@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
+    "build": "rimraf dist && tsc",
     "prepare": "ts-patch install && typia patch"
   },
   "keywords": [],
@@ -25,6 +25,7 @@
     "dotenv": "^16.4.7",
     "openai": "^4.83.0",
     "prisma": "^6.3.1",
+    "rimraf": "^6.0.1",
     "typia": "^7.6.3"
   }
 }
