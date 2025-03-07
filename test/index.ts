@@ -21,10 +21,16 @@ async function test_create_vector_store_and_query_messages() {
     },
   });
 
-  const metadata = await selector.create();
-  const response = await selector.query({ query: "hi!" });
+  const fileCount = await selector.attach({
+    files: [
+      {
+        name: "Interactive effects of microplastic pollution and heat stress on reef-building corals.pdf",
+        data: "https://studio-api-bucket.s3.ap-northeast-2.amazonaws.com/rag-test-2.pdf",
+      },
+    ],
+  });
 
-  console.log("response", response);
+  const { response } = await selector.query({ query: "Conclusions" });
 }
 
 test_create_vector_store_and_query_messages();
