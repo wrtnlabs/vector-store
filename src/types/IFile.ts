@@ -9,5 +9,5 @@ export type IFile = {
   /**
    * file data or url
    */
-  data: (string & tags.Format<"iri">) | ArrayBuffer;
+  data: (string & tags.Format<"iri">) | ArrayBuffer | File;
 };

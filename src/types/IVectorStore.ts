@@ -140,13 +140,4 @@ export abstract class IVectorStore implements IFileFunction {
    * @inheritdoc
    */
   abstract list(): Promise<IVectorStoreFile[]>;
-
-  /**
-   * Creates a new vector store instance.
-   *
-   * This method should be implemented to initialize the vector store and return metadata
-   *
-   * @returns A promise that resolves to an object containing the vector store's id, name, and type.
-   */
-  abstract create(): Promise<{ vectorStore: IVectorStore.IAt; assistant: IAssistant.IAt }>;
 }
