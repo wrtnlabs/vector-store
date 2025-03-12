@@ -60,8 +60,23 @@ export interface IFileFunction {
 }
 
 export namespace IVectorStore {
-  export interface IQuery {
+  export interface IQueryInput {
+    /**
+     * query keyword
+     */
     query: string;
+  }
+
+  export interface IQueryOutput {
+    /**
+     * Response from VectorStore.
+     *
+     * The response may be inaccurate or difficult to answer,
+     * depending on the query's request factor value.
+     * If you are asked for additional factors in response,
+     * you can ask the user to give you a better keyword.
+     */
+    response: string | null;
   }
 
   export interface IAttach {
@@ -76,6 +91,7 @@ export namespace IVectorStore {
        */
       data: string & tags.Format<"iri">;
     }[];
+
     chunking_strategy?: FileChunkingStrategyParam;
   }
 
@@ -134,7 +150,14 @@ export abstract class IVectorStore implements IFileFunction {
   // The underlying file storage mechanism (could be Redis, Postgres, in-memory, etc.)
   constructor(protected readonly store?: IStore) {}
 
-  abstract query(props: IVectorStore.IQuery): Promise<{ response: string | null }>;
+  /**
+   * Queries data using the Openai VectorStore.
+   *
+   * Who want to query can also get better search results if you include specific keywords.
+   *
+   * @param props Query
+   */
+  abstract query(props: IVectorStore.IQueryInput): Promise<{ response: string | null }>;
 
   /**
    * @inheritdoc
