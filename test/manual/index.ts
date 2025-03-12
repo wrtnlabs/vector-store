@@ -23,8 +23,10 @@ const askQuestion = (prompt: string): Promise<string> => {
 };
 
 async function main() {
-  const TEST_NAME = "TEST_NAME" as const;
-  const assistant_id = "asst_OOAkIiD1l2C2UmPjJkPtqUr1" as const;
+  // const TEST_NAME = "TEST_NAME" as const;
+  // const assistant_id = "asst_OOAkIiD1l2C2UmPjJkPtqUr1" as const;
+
+  const assistant_id = `asst_G2mAY8kXNuXRtJXV7KFG7SW0` as const; // TEST_NAME_3
   const vector_store_id = "vs_67c99c5df9e081919bdf9042d2d107c8" as const;
 
   const openai = new OpenAI({ apiKey: process.env.OPENAI_KEY });
@@ -40,14 +42,25 @@ async function main() {
     },
   });
 
-  await selector.attach({
-    files: [
-      {
-        name: "Interactive effects of microplastic pollution and heat stress on reef-building corals.pdf",
-        data: "https://studio-api-bucket.s3.ap-northeast-2.amazonaws.com/rag-test-2.pdf",
-      },
-    ],
-  });
+  // await selector.attach({
+  //   files: [
+  //     {
+  //       name: "Interactive effects of microplastic pollution and heat stress on reef-building corals.pdf",
+  //       data: "https://studio-api-bucket.s3.ap-northeast-2.amazonaws.com/rag-test-2.pdf",
+  //     },
+  //   ],
+  // });
+
+  // const file = fs.readFileSync(path.join(__dirname, "./chunk_1.json"), {});
+
+  // await selector.attach({
+  //   files: [
+  //     {
+  //       name: "slack_channel_histories.json",
+  //       data: file,
+  //     },
+  //   ],
+  // });
 
   const agent = new Agentica({
     model: "chatgpt",
@@ -63,6 +76,18 @@ async function main() {
         execute: selector,
       },
     ],
+    config: {
+      systemPrompt: {
+        initialize: () =>
+          [
+            "You are a helpful assistant.",
+            "",
+            "Use the supplied tools to assist the user.",
+            "The user will ask questions about the Korean language department,",
+            "and Assistant has a vector store with Korean language department files as a tool.",
+          ].join("\n"),
+      },
+    },
   });
 
   let input = "";
