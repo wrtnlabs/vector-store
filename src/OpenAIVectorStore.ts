@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import OpenAI from "openai";
 import { tags } from "typia";
 import { IProvider } from "./types/IProvider";
@@ -14,14 +15,38 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
     super(props.store);
   }
 
-  status() {
+  /**
+   * Returns the status of the current {@link AgenticaOpenAIVectorStoreSelector Selector}.
+   *
+   * Tells which vector store and which assistance exists inside the selector.
+   * The information you provide is light metadata such as ID and name, number of files, and model name.
+   *
+   * @returns
+   */
+  async status() {
+    if (this.ready === false) {
+      await this.create();
+    }
+
     return {
-      vectorStore: this.vectorStore,
-      assistant: this.assistant,
+      vectorStore: {
+        id: this.vectorStore?.id,
+        name: this.vectorStore?.name,
+        fileCounts: this.vectorStore?.file_counts,
+      },
+      assistant: {
+        id: this.assistant?.id,
+        name: this.assistant?.name,
+        model: this.assistant?.model,
+        tools: this.assistant?.tools,
+      },
     };
   }
 
-  async query(props: IVectorStore.IQuery): Promise<{ response: string | null }> {
+  /**
+   * @inheritdoc
+   */
+  async query(props: IVectorStore.IQueryInput): Promise<IVectorStore.IQueryOutput> {
     if (this.ready === false) {
       await this.create();
     }
@@ -52,6 +77,9 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
     return { response };
   }
 
+  /**
+   * @inheritdoc
+   */
   async attach(props: IVectorStore.IAttach): Promise<FileCounts> {
     if (this.ready === false) {
       await this.create();
@@ -65,7 +93,8 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
     const files = await Promise.all(
       props.files.map(async (el) => {
         const buffer = typeof el.data === "string" ? await this.getFile(el.data) : el.data;
-        return new File([buffer], el.name, { type: "text/plain" });
+        const checksum = this.getChecksum(buffer);
+        return new File([buffer], `${checksum}-${el.name}`, { type: "text/plain" });
       })
     );
 
@@ -75,6 +104,9 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
     return response.file_counts;
   }
 
+  /**
+   * @inheritdoc
+   */
   async detach(): Promise<FileCounts> {
     if (this.ready === false) {
       await this.create();
@@ -84,9 +116,14 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
       throw new Error("call `create` function before calling this function.");
     }
 
+    const openai = this.props.provider.api;
+
     throw new Error("Method not implemented.");
   }
 
+  /**
+   * @inheritdoc
+   */
   async list(): Promise<IVectorStoreFile[]> {
     if (this.ready === false) {
       await this.create();
@@ -152,7 +189,17 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
     if ("id" in assistant) {
       return openai.beta.assistants.retrieve(assistant.id);
     } else {
-      return openai.beta.assistants.create(assistant);
+      return openai.beta.assistants.create({ ...assistant, tools: [{ type: "file_search" }] });
     }
+  }
+
+  private async getChecksum(file: (string & tags.Format<"iri">) | ArrayBuffer): Promise<string> {
+    let buffer = file;
+    if (typeof buffer === "string") {
+      const response = await fetch(buffer);
+      buffer = await response.arrayBuffer();
+    }
+    const hash = crypto.createHash("sha256").update(Buffer.from(buffer)).digest("hex"); // 해싱
+    return hash;
   }
 }
