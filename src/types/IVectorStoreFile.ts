@@ -11,8 +11,17 @@ export interface IVectorStoreFile {
 
   /**
    * Saved name of the file.
+   *
+   * The name where the file is finally saved
+   * is the following form by adding a hash code.:
+   * - `{hash}-${original_name}`
    */
   name: string;
+
+  /**
+   * Original file name.
+   */
+  original_name: string;
 
   /**
    * SHA-256 hash of the file content.

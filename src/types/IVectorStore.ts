@@ -41,7 +41,7 @@ export interface IFileFunction {
    *
    * @returns Number of files covered by Vector DB
    */
-  attach: (file: IVectorStore.IAttach) => Promise<FileCounts>;
+  attach: (file: IVectorStore.IAttachInput) => Promise<FileCounts>;
 
   /**
    * Removes a file reference from the vector store's analysis list.
@@ -49,7 +49,7 @@ export interface IFileFunction {
    *
    * @returns Number of files covered by Vector DB
    */
-  detach?: () => Promise<FileCounts>;
+  detach?: (props: IVectorStore.IDetachInput) => Promise<FileCounts>;
 
   /**
    * Retrieves the list of files currently registered in the vector store.
@@ -79,7 +79,7 @@ export namespace IVectorStore {
     response: string | null;
   }
 
-  export interface IAttach {
+  export interface IAttachInput {
     files: {
       /**
        * filename
@@ -94,6 +94,31 @@ export namespace IVectorStore {
 
     chunking_strategy?: FileChunkingStrategyParam;
   }
+
+  export type IDetachInput =
+    | {
+        /**
+         * File ID in OpenAI Platform
+         */
+        fileId: string;
+      }
+    | {
+        /**
+         * Hash
+         *
+         * When you call the 'list' function to query the file list,
+         * each element has a hash property.
+         */
+        hash: string;
+      }
+    | {
+        /**
+         * filename
+         *
+         * Indicates the name when the file was saved.
+         */
+        filename: string;
+      };
 
   export interface ICreate {
     type: "openai";
@@ -162,12 +187,12 @@ export abstract class IVectorStore implements IFileFunction {
   /**
    * @inheritdoc
    */
-  abstract attach(props: IVectorStore.IAttach): Promise<FileCounts>;
+  abstract attach(props: IVectorStore.IAttachInput): Promise<FileCounts>;
 
   /**
    * @inheritdoc
    */
-  abstract detach(): Promise<FileCounts>;
+  abstract detach(props: IVectorStore.IDetachInput): Promise<FileCounts>;
 
   /**
    * @inheritdoc

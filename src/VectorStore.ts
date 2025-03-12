@@ -1,1 +1,1 @@
-export class VectorStore {}
+class VectorStore {}

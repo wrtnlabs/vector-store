@@ -80,7 +80,7 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
   /**
    * @inheritdoc
    */
-  async attach(props: IVectorStore.IAttach): Promise<FileCounts> {
+  async attach(props: IVectorStore.IAttachInput): Promise<FileCounts> {
     if (this.ready === false) {
       await this.create();
     }
@@ -107,7 +107,7 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
   /**
    * @inheritdoc
    */
-  async detach(): Promise<FileCounts> {
+  async detach(props: IVectorStore.IDetachInput): Promise<FileCounts> {
     if (this.ready === false) {
       await this.create();
     }
@@ -117,6 +117,22 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
     }
 
     const openai = this.props.provider.api;
+    const vectorStoreId = this.vectorStore.id;
+
+    const files = await this.list();
+    const file = files.find((el) => {
+      if ("fileId" in props) {
+        return el.id === props.fileId;
+      } else if ("hash" in props) {
+        return el.hash === props.hash;
+      } else {
+        return el.original_name === props.filename;
+      }
+    });
+
+    if (file) {
+      await openai.beta.vectorStores.files.del(vectorStoreId, file.id);
+    }
 
     throw new Error("Method not implemented.");
   }
@@ -159,6 +175,7 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
           hash: hash?.length === SHA_256_LENGTH ? hash : null,
           id: file.id,
           name: detailed.filename,
+          original_name: detailed.filename.replace(`${hash}-`, ""),
           size: detailed.bytes,
           vector_store_id: this.vectorStore?.id!,
           created_at: new Date(parseInt(file.created_at + "000")).toISOString(),
