@@ -19,7 +19,7 @@ export interface IVectorStoreFile {
    * This hash is generated using a function like `getFileHash` (see below) to compute a hash from a file buffer,
    * and is used to detect duplicate files.
    */
-  hash?: string;
+  hash: string | null;
 
   /**
    * Identifier of the associated vector store.
@@ -27,19 +27,9 @@ export interface IVectorStoreFile {
   vector_store_id: string;
 
   /**
-   * Optional identifier of the file.
-   */
-  file_id?: string;
-
-  /**
    * Optional file extension.
    */
   extension?: string;
-
-  /**
-   * Publicly accessible address of the file.
-   */
-  url: string;
 
   /**
    * Size of the file in bytes.
