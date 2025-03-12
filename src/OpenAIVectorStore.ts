@@ -1,10 +1,10 @@
 import crypto from "crypto";
 import OpenAI from "openai";
 import { tags } from "typia";
+import { IVectorStoreFile } from "./types";
 import { IProvider } from "./types/IProvider";
 import { IStore } from "./types/IStore";
 import { FileCounts, IVectorStore } from "./types/IVectorStore";
-import { IVectorStoreFile } from "./types/IVectorStoreFile";
 
 export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
   private vectorStore: OpenAI.Beta.VectorStores.VectorStore | null = null;
@@ -133,7 +133,38 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
       throw new Error("call `create` function before calling this function.");
     }
 
-    throw new Error("Method not implemented.");
+    const openai = this.props.provider.api;
+    const vectorStoreId = this.vectorStore.id;
+    const totalFiles: OpenAI.Beta.VectorStores.Files.VectorStoreFile[] = [];
+    let after: string | null = null;
+    do {
+      const options: { after?: string } = {};
+      if (after !== null) {
+        options.after = after;
+      }
+
+      const response = await openai.beta.vectorStores.files.list(vectorStoreId, options);
+      after = response.nextPageParams()?.after ?? null;
+      totalFiles.push(...response.data);
+    } while (after !== null);
+
+    return Promise.all(
+      totalFiles.map(async (file): Promise<IVectorStoreFile> => {
+        const detailed = await openai.files.retrieve(file.id);
+
+        const [hash] = detailed.filename.match(new RegExp(".*(?=-)")) ?? [];
+        const SHA_256_LENGTH = 64 as const;
+
+        return {
+          hash: hash?.length === SHA_256_LENGTH ? hash : null,
+          id: file.id,
+          name: detailed.filename,
+          size: detailed.bytes,
+          vector_store_id: this.vectorStore?.id!,
+          created_at: new Date(parseInt(file.created_at + "000")).toISOString(),
+        };
+      })
+    );
   }
 
   private async getFile(fileUrl: string & tags.Format<"iri">): Promise<ArrayBuffer> {
