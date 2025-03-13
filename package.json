@@ -7,7 +7,7 @@
     "access": "public"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "ts-node test/index.ts",
     "build": "rimraf dist && tsc",
     "prepare": "ts-patch install"
   },
@@ -23,6 +23,9 @@
   "description": "",
   "devDependencies": {
     "@agentica/core": "^0.11.1",
+    "@nestia/e2e": "^0.8.2",
+    "@types/inquirer": "^9.0.7",
+    "inquirer": "8.2.5",
     "ts-patch": "^3.3.0",
     "typescript": "~5.8.2"
   },
