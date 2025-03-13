@@ -207,7 +207,7 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
       totalFiles.map(async (file): Promise<IVectorStoreFile> => {
         const detailed = await openai.files.retrieve(file.id);
 
-        const [hash] = detailed.filename.match(new RegExp(".*(?=-)")) ?? [];
+        const [hash] = detailed.filename.match(new RegExp(".*?(?=-)")) ?? [];
         const SHA_256_LENGTH = 64 as const;
 
         return {
