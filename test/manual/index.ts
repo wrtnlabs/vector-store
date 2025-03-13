@@ -48,7 +48,7 @@ async function main() {
     controllers: [
       {
         protocol: "class",
-        name: "vectorStore",
+        name: "Korean language department vector DB",
         application: typia.llm.application<AgenticaOpenAIVectorStoreSelector, "chatgpt">(),
         execute: selector,
       },
