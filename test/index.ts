@@ -1,6 +1,10 @@
 import { DynamicExecutor } from "@nestia/e2e";
 import chalk from "chalk";
+import dotenv from "dotenv";
+import OpenAI from "openai";
 import { ArgumentParser } from "./helpers/ArgumentParser";
+
+dotenv.config();
 
 interface IOptions {
   include?: string[];
@@ -27,12 +31,16 @@ async function main(): Promise<void> {
   //----
   // DO TEST
   const report: DynamicExecutor.IReport = await DynamicExecutor.validate({
-    parameters: () => [],
+    extension: "ts",
+    parameters: () => [new OpenAI({ apiKey: process.env.OPENAI_KEY })],
     prefix: "test",
     location: __dirname + "/features",
-    filter: (func) =>
-      (!options.include?.length || (options.include ?? []).some((str) => func.includes(str))) &&
-      (!options.exclude?.length || (options.exclude ?? []).every((str) => !func.includes(str))),
+    filter: (func) => {
+      return (
+        (!options.include?.length || (options.include ?? []).some((str) => func.includes(str))) &&
+        (!options.exclude?.length || (options.exclude ?? []).every((str) => !func.includes(str)))
+      );
+    },
     onComplete: (exec) => {
       const trace = (str: string) => console.log(`  - ${chalk.green(exec.name)}: ${str}`);
       if (exec.error === null) {
