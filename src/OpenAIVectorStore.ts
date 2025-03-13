@@ -106,8 +106,13 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
         props.files.map(async (file) => {
           if (typia.is<IFile.URLFormat>(file)) {
             const buffer = typeof file.data === "string" ? await this.getFile(file.data) : file.data;
-            const checksum = this.getChecksum(buffer);
-            return new File([buffer], `${checksum}-${file.name}`, { type: "text/plain" });
+            const checksum = await this.getChecksum(buffer);
+            const alreadyCreatedFile = totalFiles.find((el) => el.hash === checksum);
+            if (alreadyCreatedFile && alreadyCreatedFile?.originalName === file.name) {
+              return alreadyCreatedFile.id;
+            }
+
+            return new File([buffer], `${checksum}-${file.name}`);
           } else {
             if ("fileId" in file) {
               return totalFiles.find((el) => el.id === file.fileId)?.id ?? null;
@@ -134,7 +139,7 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
       );
 
     if (files.files.length !== 0) {
-    await openai.beta.vectorStores.fileBatches.uploadAndPoll(vectorStoreId, files);
+      await openai.beta.vectorStores.fileBatches.uploadAndPoll(vectorStoreId, files);
     } else if (files.fileIds.length !== 0) {
       await openai.beta.vectorStores.fileBatches.createAndPoll(vectorStoreId, { file_ids: files.fileIds });
     }
