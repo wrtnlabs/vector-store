@@ -12,11 +12,34 @@ export type IFile =
     };
 
 export namespace IFile {
+  export type IExtension =
+    | "c"
+    | "cpp"
+    | "cs"
+    | "css"
+    | "doc"
+    | "docx"
+    | "go"
+    | "html"
+    | "java"
+    | "js"
+    | "json"
+    | "md"
+    | "pdf"
+    | "php"
+    | "pptx"
+    | "py"
+    | "rb"
+    | "sb"
+    | "tex"
+    | "ts"
+    | "txt";
+
   export type URLFormat = {
     /**
      * filename
      */
-    name: string;
+    name: `${string}.${IExtension}`;
 
     /**
      * file data or url
@@ -44,6 +67,8 @@ export namespace IFile {
   export type FilenameFormat = {
     /**
      * Original file name.
+     *
+     * Only if you have uploaded it before.
      */
     originalName: string;
   };
