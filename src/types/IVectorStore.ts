@@ -3,36 +3,6 @@ import { IProvider } from "./IProvider";
 import { IStore } from "./IStore";
 import { IVectorStoreFile } from "./IVectorStoreFile";
 
-/**
- * Number of files covered by Vector DB
- */
-export interface FileCounts {
-  /**
-   * The number of files that were cancelled.
-   */
-  cancelled: number;
-
-  /**
-   * The number of files that have been successfully processed.
-   */
-  completed: number;
-
-  /**
-   * The number of files that have failed to process.
-   */
-  failed: number;
-
-  /**
-   * The number of files that are currently being processed.
-   */
-  in_progress: number;
-
-  /**
-   * The total number of files.
-   */
-  total: number;
-}
-
 export interface IFileFunction {
   /**
    * Adds a file reference to the vector store's analysis list.
@@ -40,7 +10,7 @@ export interface IFileFunction {
    *
    * @returns Number of files covered by Vector DB
    */
-  attach: (file: IVectorStore.IAttachInput) => Promise<FileCounts>;
+  attach: (file: IVectorStore.IAttachInput) => Promise<void>;
 
   /**
    * Removes a file reference from the vector store's analysis list.
@@ -48,7 +18,7 @@ export interface IFileFunction {
    *
    * @returns Number of files covered by Vector DB
    */
-  detach?: (props: IVectorStore.IDetachInput) => Promise<FileCounts>;
+  detach?: (props: IVectorStore.IDetachInput) => Promise<void>;
 
   /**
    * Retrieves the list of files currently registered in the vector store.
@@ -176,12 +146,12 @@ export abstract class IVectorStore implements IFileFunction {
   /**
    * @inheritdoc
    */
-  abstract attach(props: IVectorStore.IAttachInput): Promise<FileCounts>;
+  abstract attach(props: IVectorStore.IAttachInput): Promise<void>;
 
   /**
    * @inheritdoc
    */
-  abstract detach(props: IVectorStore.IDetachInput): Promise<FileCounts>;
+  abstract detach(props: IVectorStore.IDetachInput): Promise<void>;
 
   /**
    * @inheritdoc

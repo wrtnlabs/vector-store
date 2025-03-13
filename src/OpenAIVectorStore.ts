@@ -5,7 +5,7 @@ import typia, { tags } from "typia";
 import { IFile, IVectorStoreFile } from "./types";
 import { IProvider } from "./types/IProvider";
 import { IStore } from "./types/IStore";
-import { FileCounts, IVectorStore } from "./types/IVectorStore";
+import { IVectorStore } from "./types/IVectorStore";
 
 export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
   private vectorStore: OpenAI.Beta.VectorStores.VectorStore | null = null;
@@ -81,7 +81,7 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
   /**
    * @inheritdoc
    */
-  async attach(props: IVectorStore.IAttachInput): Promise<FileCounts> {
+  async attach(props: IVectorStore.IAttachInput): Promise<void> {
     if (this.ready === false) {
       await this.create();
     }
@@ -125,14 +125,13 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
         { files: [], fileIds: [] }
       );
 
-    const response = await openai.beta.vectorStores.fileBatches.uploadAndPoll(vectorStoreId, files);
-    return response.file_counts;
+    await openai.beta.vectorStores.fileBatches.uploadAndPoll(vectorStoreId, files);
   }
 
   /**
    * @inheritdoc
    */
-  async detach(props: IVectorStore.IDetachInput): Promise<FileCounts> {
+  async detach(props: IVectorStore.IDetachInput): Promise<void> {
     if (this.ready === false) {
       await this.create();
     }
@@ -158,8 +157,6 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
     if (file) {
       await openai.beta.vectorStores.files.del(vectorStoreId, file.id);
     }
-
-    throw new Error("Method not implemented.");
   }
 
   /**
