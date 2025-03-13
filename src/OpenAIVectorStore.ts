@@ -29,11 +29,19 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
       await this.create();
     }
 
+    if (this.vectorStore === null) {
+      throw new Error("call `create` function before calling this function.");
+    }
+
+    const openai = this.props.provider.api;
+
+    const vectorStore = await openai.beta.vectorStores.retrieve(this.vectorStore.id);
+
     return {
       vectorStore: {
         id: this.vectorStore?.id,
         name: this.vectorStore?.name,
-        fileCounts: this.vectorStore?.file_counts,
+        fileCounts: vectorStore.file_counts,
       },
       assistant: {
         id: this.assistant?.id,
