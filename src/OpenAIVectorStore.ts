@@ -156,7 +156,8 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
     const vectorStoreId = this.vectorStore.id;
 
     const files = await this.list();
-    const file = files.find((el) => {
+
+    const targets = files.filter((el) => {
       if ("fileId" in props) {
         return el.id === props.fileId;
       } else if ("hash" in props) {
@@ -166,8 +167,12 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
       }
     });
 
-    if (file) {
-      await openai.beta.vectorStores.files.del(vectorStoreId, file.id);
+    if (targets.length) {
+      await Promise.all(
+        targets.map(async (file) => {
+          const res = await openai.beta.vectorStores.files.del(vectorStoreId, file.id);
+        })
+      );
     }
   }
 
