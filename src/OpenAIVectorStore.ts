@@ -1,7 +1,8 @@
 import crypto from "crypto";
 import OpenAI from "openai";
-import { tags } from "typia";
-import { IVectorStoreFile } from "./types";
+import { Uploadable } from "openai/uploads";
+import typia, { tags } from "typia";
+import { IFile, IVectorStoreFile } from "./types";
 import { IProvider } from "./types/IProvider";
 import { IStore } from "./types/IStore";
 import { FileCounts, IVectorStore } from "./types/IVectorStore";
@@ -90,17 +91,41 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
     }
 
     const vectorStoreId = this.vectorStore.id;
-    const files = await Promise.all(
-      props.files.map(async (el) => {
-        const buffer = typeof el.data === "string" ? await this.getFile(el.data) : el.data;
-        const checksum = this.getChecksum(buffer);
-        return new File([buffer], `${checksum}-${el.name}`, { type: "text/plain" });
-      })
-    );
-
     const openai = this.props.provider.api;
-    const response = await openai.beta.vectorStores.fileBatches.uploadAndPoll(vectorStoreId, { files });
+    const totalFiles = await this.files();
+    const files = (
+      await Promise.all(
+        props.files.map(async (file) => {
+          if (typia.is<IFile.URLFormat>(file)) {
+            const buffer = typeof file.data === "string" ? await this.getFile(file.data) : file.data;
+            const checksum = this.getChecksum(buffer);
+            return new File([buffer], `${checksum}-${file.name}`, { type: "text/plain" });
+          } else {
+            if ("fileId" in file) {
+              return totalFiles.find((el) => el.id === file.fileId)?.id ?? null;
+            } else if ("hash" in file) {
+              return totalFiles.find((el) => el.hash === file.hash)?.id ?? null;
+            } else {
+              return totalFiles.find((el) => el.originalName === file.originalName)?.id ?? null;
+            }
+          }
+        })
+      )
+    )
+      .filter((file) => file !== null)
+      .reduce<{ files: Uploadable[]; fileIds: string[] }>(
+        (acc, cur) => {
+          if (typeof cur === "string") {
+            acc.fileIds.push(cur);
+          } else {
+            acc.files.push(cur);
+          }
+          return acc;
+        },
+        { files: [], fileIds: [] }
+      );
 
+    const response = await openai.beta.vectorStores.fileBatches.uploadAndPoll(vectorStoreId, files);
     return response.file_counts;
   }
 
@@ -126,7 +151,7 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
       } else if ("hash" in props) {
         return el.hash === props.hash;
       } else {
-        return el.original_name === props.filename;
+        return el.originalName === props.filename;
       }
     });
 
@@ -175,13 +200,47 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
           hash: hash?.length === SHA_256_LENGTH ? hash : null,
           id: file.id,
           name: detailed.filename,
-          original_name: detailed.filename.replace(`${hash}-`, ""),
+          originalName: detailed.filename.replace(`${hash}-`, ""),
           size: detailed.bytes,
-          vector_store_id: this.vectorStore?.id!,
-          created_at: new Date(parseInt(file.created_at + "000")).toISOString(),
+          vectorStoreId: this.vectorStore?.id!,
+          createdAt: new Date(parseInt(file.created_at + "000")).toISOString(),
         };
       })
     );
+  }
+
+  /**
+   * Look up all files accessible to the Key, regardless of the Vector Store.
+   */
+  private async files() {
+    const openai = this.props.provider.api;
+    const totalFiles: OpenAI.Files.FileObject[] = [];
+    let after: string | null = null;
+    do {
+      const options: { after?: string } = {};
+      if (after !== null) {
+        options.after = after;
+      }
+
+      const response = await openai.files.list(options);
+      after = response.nextPageParams()?.after ?? null;
+      totalFiles.push(...response.data);
+    } while (after !== null);
+
+    return totalFiles.map((file) => {
+      const [hash] = file.filename.match(new RegExp(".*(?=-)")) ?? [];
+      const SHA_256_LENGTH = 64 as const;
+
+      return {
+        hash: hash?.length === SHA_256_LENGTH ? hash : null,
+        id: file.id,
+        name: file.filename,
+        originalName: file.filename.replace(`${hash}-`, ""),
+        size: file.bytes,
+        vectorStoreId: this.vectorStore?.id!,
+        createdAt: new Date(parseInt(file.created_at + "000")).toISOString(),
+      };
+    });
   }
 
   private async getFile(fileUrl: string & tags.Format<"iri">): Promise<ArrayBuffer> {

@@ -21,7 +21,7 @@ export interface IVectorStoreFile {
   /**
    * Original file name.
    */
-  original_name: string;
+  originalName: string;
 
   /**
    * SHA-256 hash of the file content.
@@ -33,7 +33,7 @@ export interface IVectorStoreFile {
   /**
    * Identifier of the associated vector store.
    */
-  vector_store_id: string;
+  vectorStoreId: string;
 
   /**
    * Optional file extension.
@@ -49,5 +49,5 @@ export interface IVectorStoreFile {
    * Timestamp when the file record was created.
    * Represented as an ISO 8601 formatted string.
    */
-  created_at: string & tags.Format<"date-time">;
+  createdAt: string & tags.Format<"date-time">;
 }

@@ -1,5 +1,4 @@
-import { FileChunkingStrategyParam } from "openai/resources/beta/vector-stores/vector-stores";
-import { tags } from "typia";
+import { IFile } from "./IFile";
 import { IProvider } from "./IProvider";
 import { IStore } from "./IStore";
 import { IVectorStoreFile } from "./IVectorStoreFile";
@@ -80,19 +79,9 @@ export namespace IVectorStore {
   }
 
   export interface IAttachInput {
-    files: {
-      /**
-       * filename
-       */
-      name: string;
+    files: (IFile.URLFormat | IFile.FileIDFormat | IFile.HashFormat | IFile.FilenameFormat)[];
 
-      /**
-       * file data or url
-       */
-      data: string & tags.Format<"iri">;
-    }[];
-
-    chunking_strategy?: FileChunkingStrategyParam;
+    // chunking_strategy?: FileChunkingStrategyParam;
   }
 
   export type IDetachInput =
