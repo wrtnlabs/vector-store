@@ -35,26 +35,41 @@ export namespace IFile {
     | "ts"
     | "txt";
 
+  /**
+   * It includes name and data(URL format) properties.
+   */
   export type URLFormat = {
+    type: "URL_FORMAT";
+
     /**
      * filename
      */
     name: `${string}.${IExtension}`;
 
     /**
-     * file data or url
+     * file url
      */
     data: string & tags.Format<"iri">;
   };
 
+  /**
+   * It includes fileId property means ID of OpenAI Platform
+   */
   export type FileIDFormat = {
+    type: "FILE_ID";
+
     /**
      * File ID in OpenAI Platform
      */
     fileId: string;
   };
 
+  /**
+   * It includes hash property.
+   */
   export type HashFormat = {
+    type: "HASH";
+
     /**
      * Hash
      *
@@ -64,7 +79,12 @@ export namespace IFile {
     hash: string;
   };
 
+  /**
+   * it include originalName property.
+   */
   export type FilenameFormat = {
+    type: "ORIGINAL_NAME";
+
     /**
      * Original file name.
      *

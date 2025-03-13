@@ -163,12 +163,12 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
     const files = await this.list();
 
     const targets = files.filter((el) => {
-      if ("fileId" in props) {
-        return el.id === props.fileId;
-      } else if ("hash" in props) {
-        return el.hash === props.hash;
+      if ("fileId" in props.file) {
+        return el.id === props.file.fileId;
+      } else if ("hash" in props.file) {
+        return el.hash === props.file.hash;
       } else {
-        return el.originalName === props.filename;
+        return el.originalName === props.file.filename;
       }
     });
 

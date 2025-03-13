@@ -54,30 +54,32 @@ export namespace IVectorStore {
     // chunking_strategy?: FileChunkingStrategyParam;
   }
 
-  export type IDetachInput =
-    | {
-        /**
-         * File ID in OpenAI Platform
-         */
-        fileId: string;
-      }
-    | {
-        /**
-         * Hash
-         *
-         * When you call the 'list' function to query the file list,
-         * each element has a hash property.
-         */
-        hash: string;
-      }
-    | {
-        /**
-         * filename
-         *
-         * Indicates the name when the file was saved.
-         */
-        filename: string;
-      };
+  export interface IDetachInput {
+    file:
+      | {
+          /**
+           * File ID in OpenAI Platform
+           */
+          fileId: string;
+        }
+      | {
+          /**
+           * Hash
+           *
+           * When you call the 'list' function to query the file list,
+           * each element has a hash property.
+           */
+          hash: string;
+        }
+      | {
+          /**
+           * filename
+           *
+           * Indicates the name when the file was saved.
+           */
+          filename: string;
+        };
+  }
 
   export interface ICreate {
     type: "openai";
