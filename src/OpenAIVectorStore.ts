@@ -133,7 +133,11 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
         { files: [], fileIds: [] }
       );
 
+    if (files.files.length !== 0) {
     await openai.beta.vectorStores.fileBatches.uploadAndPoll(vectorStoreId, files);
+    } else if (files.fileIds.length !== 0) {
+      await openai.beta.vectorStores.fileBatches.createAndPoll(vectorStoreId, { file_ids: files.fileIds });
+    }
   }
 
   /**
