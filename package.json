@@ -1,6 +1,6 @@
 {
   "name": "@agentica/openai-vector-store",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
   "publishConfig": {
@@ -33,9 +33,11 @@
     "@aws-sdk/client-s3": "3.744.0",
     "@prisma/client": "6.3.1",
     "dotenv": "16.4.7",
-    "openai": "4.87.0",
     "prisma": "6.3.1",
     "rimraf": "6.0.1",
     "typia": "8.0.1"
+  },
+  "peerDependencies": {
+    "openai": "4.87.0"
   }
 }
