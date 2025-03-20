@@ -8,7 +8,7 @@ import { IStore } from "./types/IStore";
 import { IVectorStore } from "./types/IVectorStore";
 
 export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
-  private vectorStore: OpenAI.Beta.VectorStores.VectorStore | null = null;
+  private vectorStore: OpenAI.VectorStores.VectorStore | null = null;
   private assistant: OpenAI.Beta.Assistants.Assistant | null = null;
   private ready: boolean = false;
 
@@ -35,7 +35,7 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
 
     const openai = this.props.provider.api;
 
-    const vectorStore = await openai.beta.vectorStores.retrieve(this.vectorStore.id);
+    const vectorStore = await openai.vectorStores.retrieve(this.vectorStore.id);
 
     return {
       vectorStore: {
@@ -139,9 +139,9 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
       );
 
     if (files.files.length !== 0) {
-      await openai.beta.vectorStores.fileBatches.uploadAndPoll(vectorStoreId, files);
+      await openai.vectorStores.fileBatches.uploadAndPoll(vectorStoreId, files);
     } else if (files.fileIds.length !== 0) {
-      await openai.beta.vectorStores.fileBatches.createAndPoll(vectorStoreId, { file_ids: files.fileIds });
+      await openai.vectorStores.fileBatches.createAndPoll(vectorStoreId, { file_ids: files.fileIds });
     }
   }
 
@@ -175,7 +175,7 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
     if (targets.length) {
       await Promise.all(
         targets.map(async (file) => {
-          const res = await openai.beta.vectorStores.files.del(vectorStoreId, file.id);
+          const res = await openai.vectorStores.files.del(vectorStoreId, file.id);
         })
       );
     }
@@ -195,7 +195,7 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
 
     const openai = this.props.provider.api;
     const vectorStoreId = this.vectorStore.id;
-    const totalFiles: OpenAI.Beta.VectorStores.Files.VectorStoreFile[] = [];
+    const totalFiles: OpenAI.VectorStores.Files.VectorStoreFile[] = [];
     let after: string | null = null;
     do {
       const options: { after?: string } = {};
@@ -203,7 +203,7 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
         options.after = after;
       }
 
-      const response = await openai.beta.vectorStores.files.list(vectorStoreId, options);
+      const response = await openai.vectorStores.files.list(vectorStoreId, options);
       after = response.nextPageParams()?.after ?? null;
       totalFiles.push(...response.data);
     } while (after !== null);
@@ -291,12 +291,12 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
     }
   }
 
-  private async emplaceVectorStore(): Promise<OpenAI.Beta.VectorStores.VectorStore> {
+  private async emplaceVectorStore(): Promise<OpenAI.VectorStores.VectorStore> {
     const openai = this.props.provider.api;
     const vectorStore = this.props.provider.vectorStore;
 
     if ("name" in vectorStore) {
-      return await openai.beta.vectorStores.create({
+      return await openai.vectorStores.create({
         name: vectorStore.name,
         chunking_strategy: vectorStore.chunking_strategy ?? {
           type: "static",
@@ -304,7 +304,7 @@ export class AgenticaOpenAIVectorStoreSelector extends IVectorStore {
         },
       });
     } else {
-      return await openai.beta.vectorStores.retrieve(vectorStore.id);
+      return await openai.vectorStores.retrieve(vectorStore.id);
     }
   }
 

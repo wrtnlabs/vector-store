@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { AssistantCreateParams } from "openai/resources/beta/assistants";
-import { FileChunkingStrategyParam } from "openai/resources/beta/vector-stores/vector-stores";
+import { FileChunkingStrategyParam } from "openai/resources/vector-stores/vector-stores";
 
 export interface IProvider {
   /**

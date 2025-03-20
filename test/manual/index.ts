@@ -30,12 +30,8 @@ async function main() {
   const selector = new AgenticaOpenAIVectorStoreSelector({
     provider: {
       api: openai,
-      assistant: {
-        id: assistant_id,
-      },
-      vectorStore: {
-        id: vector_store_id,
-      },
+      assistant: { name: "agentica", model: "gpt-4o-mini" },
+      vectorStore: { name: "vectorStore" },
     },
   });
 
